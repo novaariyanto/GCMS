@@ -42,7 +42,11 @@ return new class extends Migration
             $table->unsignedTinyInteger('satisfaction_rating')->nullable();
             $table->text('satisfaction_note')->nullable();
             if ($driver !== 'sqlite') {
+                if (Schema::getConnection()->getDriverName() !== 'sqlite') {
                 $table->fullText(['title', 'description', 'ticket_number']);
+            } else {
+                $table->index('ticket_number');
+            }
             } else {
                 $table->index('ticket_number');
             }
