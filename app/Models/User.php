@@ -5,10 +5,13 @@ namespace App\Models;
 use App\Domain\Auth\Models\LoginHistory;
 use App\Domain\Auth\Models\OtpCode;
 use App\Domain\Auth\Models\UserDevice;
+use App\Domain\Auth\Enums\UserRole;
 use App\Domain\Complaint\Models\Complaint;
 use App\Domain\Organization\Models\Opd;
 use App\Domain\Organization\Models\Unit;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,7 +22,7 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable implements FilamentUser, JWTSubject
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
@@ -83,6 +86,20 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims(): array
     {
         return [];
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->is_active
+            && $panel->getId() === 'admin'
+            && $this->hasAnyRole([
+                UserRole::SUPER_ADMIN->value,
+                UserRole::ADMINISTRATOR->value,
+                UserRole::ADMIN_OPD->value,
+                UserRole::ADMIN_UNIT->value,
+                UserRole::SUPERVISOR->value,
+                UserRole::PETUGAS->value,
+            ]);
     }
 
     public function opd(): BelongsTo
