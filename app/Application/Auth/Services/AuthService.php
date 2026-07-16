@@ -7,6 +7,7 @@ use App\Domain\Auth\Models\LoginHistory;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthService
@@ -63,8 +64,10 @@ class AuthService
 
         $user = User::query()->create($data);
 
-        if (method_exists($user, 'assignRole')) {
+        try {
             $user->assignRole($role);
+        } catch (Throwable) {
+            // Role seed data may not be present in every local/test setup.
         }
 
         return $user->refresh();

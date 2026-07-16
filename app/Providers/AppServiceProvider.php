@@ -8,6 +8,7 @@ use App\Domain\Complaint\Models\Complaint;
 use App\Domain\Complaint\Policies\ComplaintPolicy;
 use App\Infrastructure\Persistence\Repositories\ComplaintRepository;
 use App\Infrastructure\Persistence\Repositories\WorkflowRepository;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -28,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::useBootstrapFive();
+
         Event::listen(ComplaintCreated::class, SendComplaintCreatedNotification::class);
 
         Gate::policy(Complaint::class, ComplaintPolicy::class);
